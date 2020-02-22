@@ -7,16 +7,7 @@
     <title>Add User</title>
 </head>
 <body>
-<?php
-    /*enter name, check availability, choose icon
-    2. create user
-    3. go to userlogin. */
-    if(isset($_POST['submit']))
-    {
-        
-    }
-?>
-    <form action="adduser.php" method="post">
+    <form action="user_controller.php" method="get">
         <input type="text" name="username" id="username">
         <input type="button" value="submit">
     </form>

@@ -1,49 +1,3 @@
-<?php
-    if ($uploadedFiles = $_FILES["mediaFiles"])
-    {
-        $target_dir = "../media/";
-        $uploadOk = 1;
-        $stmnt = "INSERT INTO `media` (`Created`, `Filename`, `Owner`, 'Player') VALUES (";
-
-        foreach ($uploadedFiles as $file) {
-            $target_file = $target_dir . basename($file["name"]);
-
-            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-            $check = getimagesize($file["tmp_name"]);
-
-            $uploadOk = $check !== false ? 1 : 0;
-            
-            if(file_exists($target_file))
-            {
-                echo basename($file["name"]) . "- file already exists.";
-                $uploadOk = 0;
-                //do overwrite question
-            }
-
-            if($uploadOk)
-            {
-                if(move_uploaded_file($file["tmp_name"], $target_file))
-                {
-                    echo "upload success";
-                    if($imageFileType != "jpg" && $imageFileType != "jpeg" && $imageFileType != "png" && $imageFileType != "gif")
-                    {
-                        $stmnt .= "('" . date('Y m d H:i:s',filectime("../media/". $file["name"])) . "','" . $file["name"] . "', " . $_SESSION["userData"]["PK"] . "', 1)";
-                    }
-                    else
-                    {
-                        $stmnt .= "('" . date('Y m d H:i:s',filectime("../media/". $file["name"])) . "','" . $file["name"] . "', " . $_SESSION["userData"]["PK"] . "', 0)";
-                    }       
-                }
-            }
-        }
-
-        $stmnt .= ")";
-        //insert new media
-        $_SESSION["connection"]->query($stmnt);
-        header("Location: http://localhost/familyalbum/pages/albums.php");
-    }
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +53,7 @@
         }
 
         function uploadFile(file) {
-            let url = 'mediaupload.php';
+            let url = 'media_controller.php';
             let formData = new FormData();
 
             forData.append('file', file);
@@ -173,7 +127,7 @@
         <div class="menu"></div>
         <div class="view">
             <div id="drop-area">
-                <form action="mediaupload.php" method="post" id="media-upload" enctype="multipart/form-data">
+                <form action="media_controller.php" method="get" id="media-upload" enctype="multipart/form-data">
                 <p>Drag'n'Drop your photos and videos here:</p>
                     <input type="file" name="mediaFiles" id="media-files" multiple accept="image/*, video/*" onchange="handleFiles(this.files)">
                 </form>

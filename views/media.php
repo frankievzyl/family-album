@@ -7,12 +7,6 @@
     <title><?php echo $_POST['albumName'] . ' - Media View'; ?></title>
 </head>
 <body>
-    <?php 
-        /*1. load settings and apply
-        2. get post variables
-        3. load media and rest of album in slider, wrapping around
-        4. 'pop-up' for note and another for tags, validate each and IUD */
-    ?>
     <div class="interface">
         <div class="menu"></div>
         <div class="view">

@@ -45,7 +45,7 @@
 </head>
 <body>
     <p style="border:1px solid black;"><?php if(isset($_POST["filename1"])){echo $stmnt; }?></p>
-    <form action="dates.php" method="post">
+    <form action="dates.php" method="get">
     <?php 
         if($newMedia = array_diff(scandir("media/photos/"),array('..','.'))){
             foreach($newMedia as $file){
