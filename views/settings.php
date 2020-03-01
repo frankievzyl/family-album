@@ -7,7 +7,7 @@
     <title>Settings</title>
 </head>
 <body>
-    <form action="user_controller.php" method="get">
+    <form name=usersettings method="get">
         <div class="theme">
             <div class="theme-settings">
                 <input type="file" name="" id="">

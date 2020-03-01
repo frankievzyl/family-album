@@ -127,7 +127,7 @@
         <div class="menu"></div>
         <div class="view">
             <div id="drop-area">
-                <form action="media_controller.php" method="get" id="media-upload" enctype="multipart/form-data">
+                <form method="get" id="media-upload" enctype="multipart/form-data">
                 <p>Drag'n'Drop your photos and videos here:</p>
                     <input type="file" name="mediaFiles" id="media-files" multiple accept="image/*, video/*" onchange="handleFiles(this.files)">
                 </form>

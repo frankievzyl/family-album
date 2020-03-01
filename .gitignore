@@ -1,2 +1,5 @@
 media/
-themes/icons
+themes/**/*.png
+themes/**/*.jpg
+themes/**/*.gif
+themes/**/*.jpeg
