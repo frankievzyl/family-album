@@ -2,75 +2,61 @@
 
     class User {
 
-        private $tuple = array('userPK' => null, 'Name' => null, 'Theme' => null, 'StripSize' => null, 'GridSize' => null, 'ReverseNote' => null, 'BookmarkStart' => null);
-        private $primary_key;
+        private $data = array('userPK' => null, 'Name' => null, 'Theme' => null, 'StripSize' => null, 'GridSize' => null, 'ReverseNote' => null, 'BookmarkStart' => null);
+        private $albums = array();
 
         public function __construct($user_data) {
             
-            $this->tuple = array_replace($this->tuple, $user_data);
-            $this->primary_key = $user_data['userPK'];             
+            $this->data = array_replace($this->data, $user_data);            
         }
-
         
-
-        public function get_pk () { return $this->primary_key; }
-
-        public function get_tuple() { return $this->tuple; }
-
-        public static function get_all() {
-
-            return Database::get_all_core('user');
-        }
-
-        public static function get_by_pk($user_pk) {
-
-            return Database::get_by_keys_core('user', 'userPK', $user_pk);
-        }
-
-        public static function insert_tuple($post_data) {
-
-            return Database::insert_tuple_core('user', $post_data);
-        }
-
-        public function delete_tuple() {
+        public static function get_loggable() {
             
-            return Database::delete_tuple_core('user', 'userPK', $primary_key);
-        }
+            $result = Database::do_select("SELECT * FROM `user`");
+            #$result = Database::do_select("SELECT * FROM `user` WHERE `userPK` != ?", "i", 1);
+            $all_users = array();    
+        
+            foreach($result as $row) {
+                $all_users[] = new User($row);
+            }
 
-        public function update_tuple($post_data) {
+            return $all_users;
+        }
+    
+        public static function insert($post_data) {
+    
+            return Database::do_insert('user', array_keys($post_data), array_values($post_data));
+        }
+    
+        public function delete() {
             
-            if(Database::update_tuple_core('user', 'userPK', $primary_key, $post_data)) {
-                $this->tuple = array_replace($this->tuple, $post_data);
+            $consensus = Database::do_delete('user', "`userPK` = ?", "i", $this->data['userPK']);
+
+            foreach ($this->albums as $album) {
+                $consensus = $consensus && $album->delete();
+            }
+            
+            return $consensus;
+        }
+    
+        public function update($post_data) {
+            
+            if( Database::do_update('user', $post_data, "`userPK` = ?", "i", $this->data['userPK'])) {
+                $this->data = array_replace($this->data, $post_data);
                 return true;
             }
             return false;
         }
-    }
-    /*enter name, check availability, choose icon
-    2. create user
-    3. go to userlogin. */
-    if(isset($_POST['submit']))
-    {
         
-    }
-    
-    session_start();
-    $result = $_SESSION["connection"]->query("SELECT `PK`,`Name` FROM `user` WHERE NOT `PK` IN (1)");
-    
-    while($row = $result->fetch_assoc()) { 
-        
-        //<button class='login-button' type='submit' value='$row['PK']" name="userPK"><?php echo $row=["Name"]; </button>
-    } 
+        public function get_albums() {
+            
+            $result = Album::get_user_albums($this->data['userPK']);
 
-   
-/**1. load user settings and display
- * 2. validate changes and apply or cancel
- */
-    if(isset($_POST['submit']))
-    {
+            foreach($result as $row) {
+                $this->albums[] = new Album($row);
+            }
 
+            return $this->albums;
+        }
     }
-    
-    //if valid; return to previous page; else show errors
-?>
 ?>

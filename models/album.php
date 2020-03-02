@@ -1,56 +1,52 @@
 <?php 
 
     class Album {
-        private $tuple = array('albumPK' => null, 'Name' => null, 'Icon' => null, 'userPK' => null);
-        private $primary_key;
+        private $data = array('albumPK' => null, 'Name' => null, 'Icon' => null, 'userPK' => null);
+        private $media = array();
 
-        public function __construct($user_data) {
+        public function __construct($album_data) {
+
+            $this->data = array_replace($this->data, $album_data);            
+        }
+    
+        public static function insert($post_data) {
+    
+            return Database::do_insert('album', array_keys($post_data), array_values($post_data));
+        }
+    
+        public function delete() {
             
-            $this->tuple = array_replace($this->tuple, $user_data);
-            $this->primary_key = $user_data['userPK'];             
+            return  Database::do_delete('album', "`albumPK` = ?", "i", $this->data['albumPK']) &&
+                    Database::do_delete('media_album', "`albumPK` = ?", "i", $this->data['albumPK']);
         }
-
-        public function get_pk () { return $this->primary_key; }
-
-        public function get_tuple() { return $this->tuple; }
-
-        public static function get_all() {
-
-            return Database::get_all_core('user');
-        }
-
-        public static function get_by_pk($user_pk) {
-
-            return Database::get_by_keys_core('user', 'userPK', $user_pk);
-        }
-
-        public static function insert_tuple($post_data) {
-
-            return Database::insert_tuple_core('user', $post_data);
-        }
-
-        public function delete_tuple() {
+    
+        public function update($post_data) {
             
-            return Database::delete_tuple_core('user', 'userPK', $primary_key);
-        }
-
-        public function update_tuple($post_data) {
-            
-            if(Database::update_tuple_core('user', 'userPK', $primary_key, $post_data)) {
-                $this->tuple = array_replace($this->tuple, $post_data);
+            if( Database::do_update('album', $post_data, "`albumPK` = ?", "i", $this->data['albumPK'])) {
+                $this->data = array_replace($this->data, $post_data);
                 return true;
             }
             return false;
         }
-    }
-    $result = $_SESSION["connection"]->query("SELECT * FROM `album` WHERE `PK` = 1 OR `Owner` = " . $_SESSION["userData"]["PK"]);
 
-    while($row = $result->fetch_assoc()) { 
-        if($row["Icon"]){
-            echo '<div class="grid-item"><a href="http://localhost/familyalbum/pages/mediagrid.php?albumPK='.$row["PK"].'&albumName='.$row["Name"].'"><img src="../media/icons/'.$row["Icon"].'" alt="'.$row["Name"].' Icon"></a></div>';
+        public static function get_user_albums($user_pk) {
+
+            return Database::do_select("SELECT * FROM `album` WHERE `userPK` IN (?, ?)", "ii", 1, $user_pk);
         }
-        else{
-            echo '<div class="grid-item"><a href="http://localhost/familyalbum/pages/mediagrid.php?albumPK='.$row["PK"].'&albumName='.$row["Name"].'"></a></div>';
+
+        public function get_media() {
+
+            $result = Media::get_album_media($this->data['albumPK']);
+
+            foreach($result as $row) {
+                $this->media[] = new Media($row);
+            }
+
+            return $this->media;
         }
-    } 
+
+        public function add_media() {
+            #TODO
+        }
+    }
 ?>

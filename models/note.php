@@ -2,45 +2,47 @@
 
     class Note {
 
-        private $tuple = array('NoteText' => null, 'userPK' => null, 'mediaPK' => null);
-        private $primary_key;
-
-        public function __construct($user_data) {
+        private $data = array('notePK' => null, 'NoteText' => null, 'userPK' => null, 'mediaPK' => null);
+        
+        public function __construct($note_data) {
             
-            $this->tuple = array_replace($this->tuple, $user_data);
-            $this->primary_key = $user_data['userPK'];             
+            $this->data = array_replace($this->data, $note_data);            
         }
 
-        public function get_pk () { return $this->primary_key; }
-
-        public function get_tuple() { return $this->tuple; }
-
-        public static function get_all() {
-
-            return Database::get_all_core('user');
-        }
-
-        public static function get_by_pk($user_pk) {
-
-            return Database::get_by_keys_core('user', 'userPK', $user_pk);
-        }
-
-        public static function insert_tuple($post_data) {
-
-            return Database::insert_tuple_core('user', $post_data);
-        }
-
-        public function delete_tuple() {
+        public static function insert($post_data) {
+    
+            $note_pk = Database::do_insert('note', array("NoteText"), array($post_data["NoteText"]));
             
-            return Database::delete_tuple_core('user', 'userPK', $primary_key);
+            if ($note_pk) {
+                
+                unset($post_data["NoteText"]);
+                $post_data["notePK"] = $note_pk;
+                return Database::do_insert('media_note', array_keys($post_data), array_values($post_data));
+
+            } else {
+
+                return false;
+            }
+        }
+    
+        public function delete() {
+            
+            return  Database::do_delete('media_note', "`notePK` = ? AND `mediaPK` = ?", "ii", $this->data['notePK'], $this->data['mediaPK']);
         }
 
-        public function update_tuple($post_data) {
-            
-            if(Database::update_tuple_core('user', 'userPK', $primary_key, $post_data)) {
-                $this->tuple = array_replace($this->tuple, $post_data);
+        public function delete_loose() {# run once before app close
+
+            return Database::do_delete('note', "`notePK` NOT IN (SELECT DISTINCT `notePK` FROM `media_note`)");
+        }
+    
+        public function update($post_data) {
+                       
+            if (Database::do_update('note', $post_data, "`notePK` = ? AND `userPK` = ?", "ii", $this->data['notePK'], $this->data['userPK'])) {
+                
+                $this->data = array_replace($this->data, $post_data);
                 return true;
             }
+        
             return false;
         }
     }

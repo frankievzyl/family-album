@@ -2,45 +2,52 @@
 
     class Tag {
 
-        private $tuple = array('tagPK' => null, 'Name' => null, 'userPK' => null);
-        private $primary_key;
+        private $data = array('tagPK' => null, 'Name' => null, `mediaPK` => null, `userPK` => null, `PosX` => null, `PosY` => null);
 
-        public function __construct($user_data) {
+        public function __construct($tag_data) {
             
-            $this->tuple = array_replace($this->tuple, $user_data);
-            $this->primary_key = $user_data['userPK'];             
+            $this->data = array_replace($this->data, $tag_data);            
         }
 
-        public function get_pk () { return $this->primary_key; }
-
-        public function get_tuple() { return $this->tuple; }
-
-        public static function get_all() {
-
-            return Database::get_all_core('user');
-        }
-
-        public static function get_by_pk($user_pk) {
-
-            return Database::get_by_keys_core('user', 'userPK', $user_pk);
-        }
-
-        public static function insert_tuple($post_data) {
-
-            return Database::insert_tuple_core('user', $post_data);
-        }
-
-        public function delete_tuple() {
+        public static function insert($post_data) {
+    
+            $tag_pk = Database::do_insert('tag', array("Name"), array($post_data["Name"]));
             
-            return Database::delete_tuple_core('user', 'userPK', $primary_key);
+            if ($tag_pk) {
+                
+                unset($post_data["Name"]);
+                $post_data["tagPK"] = $tag_pk;
+                return Database::do_insert('media_tag', array_keys($post_data), array_values($post_data));
+            } else {
+                return false;
+            }
+        }
+    
+        public function delete() {
+            
+            return  Database::do_delete('media_tag', "`tagPK` = ? AND `mediaPK` = ? AND `userPK` = ?", "iii", $this->data['tagPK'], $this->data['mediaPK'], $this->data['userPK']);
         }
 
-        public function update_tuple($post_data) {
+        public function delete_loose() {# run once before app close
+
+            return Database::do_delete('tag', "`tagPK` NOT IN (SELECT DISTINCT `tagPK` FROM `media_tag`)")
+        }
+    
+        public function update($post_data) {
+                       
+            if (array_key_exists('Name', $post_data)) {
+                
+                return Database::do_update('tag', $post_data, "`tagPK` = ?", "i", $this->data['mediaPK']);
+                
+            }else {
+                return Database::do_update('media_tag', $post_data, "`tagPK` = ? AND `mediaPK` = ? AND `userPK` = ?", "iii", $this->data['tagPK'], $this->data['mediaPK'], $this->data['userPK']);
+            }
             
-            if(Database::update_tuple_core('user', 'userPK', $primary_key, $post_data)) {
-                $this->tuple = array_replace($this->tuple, $post_data);
+            if( ) {
+                $this->data = array_replace($this->data, $post_data);
                 return true;
             }
+        
             return false;
         }
     }

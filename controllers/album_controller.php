@@ -8,7 +8,7 @@
         public function show_all() {
             $user_data = User::get_by_pk(["userPK" => $_GET["userPK"]]);
             $current_user = new User($user_data);
-            $current_user = $current_user->get_tuple();
+            $current_user = $current_user->get_data();
             $user_albums = Album::get_by_pk(["userPK" => $_GET["userPK"]]);
             require_once("views/albums.php");
         }
