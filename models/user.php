@@ -2,7 +2,7 @@
 
     class User {
 
-        private $data = array('userPK' => null, 'Name' => null, 'Theme' => null, 'StripSize' => null, 'GridSize' => null, 'ReverseNote' => null, 'BookmarkStart' => null);
+        private $data = array('userPK' => null, 'Name' => null, 'Theme' => null, 'StripSize' => null, 'AlbumSize' => null, 'MediaSize' => null, 'ReverseNote' => null, 'BookmarkStart' => null);
         private $albums = array();
 
         public function __construct($user_data) {

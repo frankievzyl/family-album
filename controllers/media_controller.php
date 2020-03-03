@@ -7,7 +7,7 @@
         function show_all() {
             $album_media = Media_Album::get_by_pk(["albumPK" => $_GET["albumPK"]]);
             $
-            require_once("views/mediagrid.php");
+            require_once("views/albummedia.php");
         }
 
         public function select_all() {
@@ -25,5 +25,9 @@
         public function remove_media() {
 
         }
-    }
+
+        #format date from db:
+        # $date = mktime(hour, minute, second, month, day, year)
+        # date(format, $date)
+    }   
 ?>

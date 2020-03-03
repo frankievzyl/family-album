@@ -45,5 +45,10 @@
         
             return false;
         }
+
+        public static function get_media_notes($media_pk) {
+
+            return Database::do_select("SELECT `note`.*, `media_note`.`mediaPK` FROM `note` INNER JOIN `media_note` ON `note`.`notePK` = `media_note`.`notePK` WHERE `media_note`.`mediaPK` = ?", "i", $media_pk);
+        }
     }
 ?>

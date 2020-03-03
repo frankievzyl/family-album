@@ -52,18 +52,37 @@
         public static function get_album_media($album_pk) {
 
             if ($album_pk == 1) {# public collection album
-                return Database::do_select("SELECT `media`.*, `ma`.`albumPK`, `ma`.`Position`, `ma`.`Bookmarked` FROM `media` LEFT JOIN `media_album` AS `ma` ON `media`.`mediaPK` = `ma`.`mediaPK`");    
+                return Database::do_select("SELECT `media`.*, `ma`.`albumPK`, `ma`.`Position`, `ma`.`Bookmarked` FROM `media` LEFT JOIN `media_album` AS `ma` ON `media`.`mediaPK` = `ma`.`mediaPK` ORDER BY `Created` DESC");    
             }else {
-                return Database::do_select("SELECT `media`.*, `ma`.`albumPK`, `ma`.`Position`, `ma`.`Bookmarked` FROM `media` INNER JOIN `media_album` AS `ma` ON `media`.`mediaPK` = `ma`.`mediaPK` WHERE `media_album`.`albumPK` = ?", "i", $album_pk);
+                return Database::do_select("SELECT `media`.*, `ma`.`albumPK`, `ma`.`Position`, `ma`.`Bookmarked` FROM `media` INNER JOIN `media_album` AS `ma` ON `media`.`mediaPK` = `ma`.`mediaPK` WHERE `media_album`.`albumPK` = ? ORDER BY `Created` DESC", "i", $album_pk);
             }
         }
-#TODO add the two get functions below
+
         public function get_notes() {
-            return Note::get_media_notes($this->data['mediaPK']);
+            
+            $result = Note::get_media_notes($this->data['mediaPK']);
+
+            foreach($result as $row) {
+                $this->notes[] = new Note($row);
+            }
+
+            return $this->notes;
         }
 
         public function get_tags() {
-            return Media::get_media_tags($this->data['mediaPK']);
+            
+            $result = Tag::get_media_tags($this->data['mediaPK']);
+
+            foreach($result as $row) {
+                $this->tags[] = new Tag($row);
+            }
+
+            return $this->tags;
+        }
+
+        public function bookmark() {
+
+            return update(array(["Bookmarked"] => date('Y-m-d H:i:s')));
         }
 
         public static function insert($file_data, $user_pk) {

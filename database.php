@@ -63,14 +63,25 @@
 
 		public static function do_insert($table, $fields, $values) {
 
+			$unique_fields = array();
+
+			foreach ($fields as $f) {
+				if (!in_array($f, $unique_fields)) {
+					$unique_fields[] = $f;
+				} else {
+					break;
+				}
+			}
+
 			self::get_connection();
-			$multiplier = count($fields) - 1;
-			$escaped = array_map(escape_field($fields));
+			$field_len = count($unique_fields);
+			$values_len = count($values);
+			$escaped = array_map(escape_field($unique_fields));
 			$escaped = implode(",",$escaped);
-			$placeholders = "(" . str_repeat("?,", $multiplier) . "?)";
-			$sql = "INSERT INTO `$table` ($escaped) VALUES " . str_repeat($placeholders.",", $multiplier) . $placeholders;
+			$placeholders = "(" . str_repeat("?,", $fields_len - 1) . "?)";
+			$sql = "INSERT INTO `$table` ($escaped) VALUES " . str_repeat($placeholders.",", $values_len / $fields_len - 1) . $placeholders;
             $stmt = self::$connection->prepare($sql);
-            $stmt->bind_param(str_repeat("s", $multiplier + 1), ...$values);
+            $stmt->bind_param(str_repeat("s", $values_len), ...$values);
 			
 			if($stmt->execute()) {
 				return self::$connection->insert_id;

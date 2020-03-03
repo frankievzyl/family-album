@@ -50,5 +50,15 @@
         
             return false;
         }
+
+        public static function get_media_tags($media_pk) {
+
+            return Database::do_select("SELECT `media_tag`.*, `tag`.`Name` FROM `media_tag` INNER JOIN `tag` ON `media_tag`.`tagPK` = `tag`.`tagPK` WHERE `media_tag`.`mediaPK` = ?", "i", $media_pk);
+        }
+
+        public static function get_active() {
+
+            return Database::do_select("SELECT * FROM `tag` WHERE `tagPK` IN (SELECT DISTINCT `tagPK` FROM `media_tag`)");
+        }
     }
 ?>
